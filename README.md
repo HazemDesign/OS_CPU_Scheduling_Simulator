@@ -1,4 +1,4 @@
-# CPU Scheduling Simulator Project - To-Do List
+# CPU Scheduling Simulator Project To-Do List
 
 ### 1. Set Up Process States
 - [ ] Define process states (READY, RUNNING, COMPLETED).
