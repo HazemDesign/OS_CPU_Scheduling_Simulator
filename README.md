@@ -1,4 +1,4 @@
-# Operating_Systems_**CPU-Scheduling**
+# OS_CPU_Scheduling_Simulator
 ---
 Here’s a simplified breakdown of each point for your CPU scheduling project:
 
