@@ -1,37 +1,39 @@
-# OS_CPU_Scheduling_Simulator
----
-Here’s a simplified breakdown of each point for your CPU scheduling project:
+# CPU Scheduling Simulator Project - To-Do List
 
-1. **Java-based GUI for CPU Scheduling**
-    
-    - [ ] Learn about Java GUI frameworks like Swing or JavaFX.
-    - [ ] Design the layout to include inputs for process details, algorithm selection, and a display area for scheduling results.
-    - [ ] Implement buttons for submitting data and running the simulation.
-2. **Consider Process State (e.g., Ready, Running)**
-    
-    - [ ] Define possible states (like "Ready," "Running," and "Completed") as constants or enums.
-    - [ ] Create a method to update the process state based on the scheduling algorithm's progress.
-3. **Develop a Data Structure for Processes**
-    
-    - [ ] Define a `Process` class with properties like `processNumber`, `cpuTime`, `priority`, and `state`.
-    - [ ] Create getters and setters for these properties to make it easy to access and modify process details.
-4. **Ready Queue Implementation**
-    
-    - [ ] Use a Java data structure like `ArrayList` or `Queue` to represent the ready queue.
-    - [ ] Implement functions to add processes to this queue and retrieve the next process based on the chosen scheduling algorithm.
-5. **Assume All Processes Arrive at Time 0**
-    
-    - [ ] Set each process’s arrival time to 0, simplifying calculations.
-    - [ ] Focus on scheduling without considering varying arrival times.
-6. **Implement CPU Scheduling Algorithms**
-    
-    - [ ] For each algorithm, write a function that selects processes from the queue according to the specific rules:
-        - [ ] **FCFS**: Process the queue in the order processes arrive.
-        - [ ] **SJF**: Select the process with the shortest CPU time remaining.
-        - [ ] **Round Robin (RR)**: Cycle through processes in the queue, using a fixed time slice or quantum.
-        - [ ] **Priority Scheduling (non-preemptive)**: Choose the process with the highest priority (lowest priority value) and only switch when it completes.
-7. **Inputs for Processes and RR Quantum**
-    
-    - [ ] Design the GUI to accept input fields for each process’s `processNumber`, `cpuTime`, and `priority`.
-    - [ ] For RR, add a separate input for the time quantum.
-    - [ ] Validate inputs and store them in the `Process` class and ready queue.
+### 1. Set Up Process States
+- [ ] Define process states (READY, RUNNING, COMPLETED).
+- [ ] Create a `Process` class with a `state` attribute, initially set to READY.
+- [ ] Add methods to update the state based on scheduling rules.
+
+### 2. Create the Process Data Structure
+- [ ] In the `Process` class, add properties like `processNumber`, `cpuTime`, `priority`, and `state`.
+- [ ] Add methods to get and set these values.
+- [ ] Create a constructor to initialize each process with its required values.
+
+### 3. Set Up the Ready Queue
+- [ ] Use a Java data structure like `ArrayList` or `Queue` for managing processes in the ready queue.
+- [ ] Implement methods to add and remove processes from the queue.
+- [ ] Add functionality to clear the queue for new simulations.
+
+### 4. Set All Process Arrival Times to Zero
+- [ ] Set the arrival time of each process to zero to simplify the simulation.
+- [ ] Focus only on the order of execution, not different arrival times.
+
+### 5. Build a Simple Java GUI
+- [ ] Set up the GUI framework (Java Swing or JavaFX).
+- [ ] Add input fields for process details (number, CPU time, priority, and RR time quantum).
+- [ ] Add dropdowns or buttons to select a scheduling algorithm.
+- [ ] Design an output area to display results and process state changes.
+
+### 6. Implement Each CPU Scheduling Algorithm
+- [ ] **FCFS (First-Come-First-Served)**: Write a function to process tasks in the order they arrive in the queue.
+- [ ] **SJF (Shortest Job First)**: Write a function to select the process with the smallest CPU time.
+- [ ] **RR (Round Robin)**: Write a function to give each process a set time (quantum) and cycle through the queue.
+- [ ] **Priority Scheduling (non-preemptive)**: Write a function to select the highest-priority process (smallest number) and complete it before moving to the next.
+
+### 7. Handle User Input for Processes and Quantum Time
+- [ ] Add input fields in the GUI for process number, required CPU time, priority, and RR time quantum.
+- [ ] Validate inputs to ensure they are correct (e.g., no negative numbers).
+- [ ] Store input data in `Process` objects and add them to the ready queue.
+
+---
