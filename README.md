@@ -6,7 +6,7 @@
 - [ ] Add methods to update the state based on scheduling rules.
 
 ### 2. Create the Process Data Structure
-- [ ] In the `Process` class, add properties like `processNumber`, `cpuTime`, `priority`, and `state`.
+- [ x ] In the `Process` class, add properties like `processNumber`, `cpuTime`, `priority`, and `state`.
 - [ ] Add methods to get and set these values.
 - [ ] Create a constructor to initialize each process with its required values.
 
