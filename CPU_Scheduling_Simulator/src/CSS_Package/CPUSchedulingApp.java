@@ -235,6 +235,10 @@ public class CPUSchedulingApp extends JFrame {
         tableModel.setRowCount(0);
     }
 
+//Scheduling Algorithms//
+
+
+//First Come First Serve
     private void scheduleFCFS(List<Process> processes) {
         // Step 1: Sort processes by arrival time (First Come First Serve)
         processes.sort((p1, p2) -> p1.arrivalTime - p2.arrivalTime);
@@ -259,55 +263,21 @@ public class CPUSchedulingApp extends JFrame {
         }
     }
 
+//Priority
     private void schedulePriority(List<Process> processes) {
         // Sort by arrival time and priority (lower priority number = higher priority)
-        processes.sort(Comparator
-            .<Process>comparingInt(p -> p.arrivalTime)
-            .thenComparingInt(p -> p.priority));
         
-        int currentTime = 0;
-        for (Process p : processes) {
-            currentTime = Math.max(currentTime, p.arrivalTime);
-            p.completionTime = currentTime + p.burstTime;
-            p.turnaroundTime = p.completionTime - p.arrivalTime;
-            p.waitingTime = p.turnaroundTime - p.burstTime;
-            currentTime = p.completionTime;
-        }
     }
 
+//Round Robin
     private void scheduleRoundRobin(List<Process> processes, int timeQuantum) {
-        List<Process> queue = new ArrayList<>(processes);
-        int currentTime = 0;
-        
-        while (!queue.isEmpty()) {
-            Process p = queue.remove(0);
-            if (p.burstTime > timeQuantum) {
-                currentTime += timeQuantum;
-                p.burstTime -= timeQuantum;
-                queue.add(p);
-            } else {
-                currentTime += p.burstTime;
-                p.completionTime = currentTime;
-                p.turnaroundTime = p.completionTime - p.arrivalTime;
-                p.waitingTime = p.turnaroundTime - p.burstTime;
-            }
-        }
+       
     }
 
+//Shortest Job First
     private void scheduleSJF(List<Process> processes) {
         // Sort by arrival time and burst time
-        processes.sort(Comparator
-            .<Process>comparingInt(p -> p.arrivalTime)
-            .thenComparingInt(p -> p.burstTime));
         
-        int currentTime = 0;
-        for (Process p : processes) {
-            currentTime = Math.max(currentTime, p.arrivalTime);
-            p.completionTime = currentTime + p.burstTime;
-            p.turnaroundTime = p.completionTime - p.arrivalTime;
-            p.waitingTime = p.turnaroundTime - p.burstTime;
-            currentTime = p.completionTime;
-        }
     }
 
     public static void main(String[] args) {
