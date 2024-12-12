@@ -16,6 +16,24 @@ public class CPUSchedulingApp extends JFrame {
     private JTextField randomProcessCountField;
     private Random random = new Random();
 
+    // Add this enum at the top of the class or as a separate file
+    public enum ProcessState {
+        READY("Ready"),
+        RUNNING("Running"),
+        COMPLETED("Completed");
+
+        private final String display;
+        
+        ProcessState(String display) {
+            this.display = display;
+        }
+        
+        @Override
+        public String toString() {
+            return display;
+        }
+    }
+
     // Process class to represent individual processes
     static class Process {
         String processId;
@@ -25,12 +43,18 @@ public class CPUSchedulingApp extends JFrame {
         int completionTime;
         int turnaroundTime;
         int waitingTime;
-
+        ProcessState state;  // New field
+        
         public Process(String processId, int arrivalTime, int burstTime, int priority) {
             this.processId = processId;
             this.arrivalTime = arrivalTime;
             this.burstTime = burstTime;
             this.priority = priority;
+            this.state = ProcessState.READY;  // Initial state
+        }
+
+        public void setState(ProcessState newState) {
+            this.state = newState;
         }
     }
 
@@ -90,7 +114,7 @@ public class CPUSchedulingApp extends JFrame {
 
         // Table for displaying processes
         String[] columnNames = {"Process ID", "Arrival Time", "Burst Time", "Priority", 
-                                "Completion Time", "Turnaround Time", "Waiting Time"};
+                              "State", "Completion Time", "Turnaround Time", "Waiting Time"};
         tableModel = new DefaultTableModel(columnNames, 0);
         processTable = new JTable(tableModel);
         JScrollPane tableScrollPane = new JScrollPane(processTable);
@@ -132,7 +156,7 @@ public class CPUSchedulingApp extends JFrame {
             // Add to table
             tableModel.addRow(new Object[]{
                 processId, arrivalTime, burstTime, priority, 
-                "-", "-", "-"
+                ProcessState.READY, "-", "-", "-"
             });
         }
     }
@@ -149,8 +173,8 @@ public class CPUSchedulingApp extends JFrame {
 
             // Add to table
             tableModel.addRow(new Object[]{
-                processId, arrivalTime, burstTime, priority, 
-                "-", "-", "-"
+                processId, arrivalTime, burstTime, priority,
+                ProcessState.READY, "-", "-", "-"
             });
 
             // Clear input fields
@@ -240,26 +264,53 @@ public class CPUSchedulingApp extends JFrame {
 
 //First Come First Serve
     private void scheduleFCFS(List<Process> processes) {
-        // Step 1: Sort processes by arrival time (First Come First Serve)
         processes.sort((p1, p2) -> p1.arrivalTime - p2.arrivalTime);
+        int currentTime = 0;
         
-        // Step 2: Process each job one by one
-        int currentTime = 0;  // Keep track of current time
-        
-        for (Process process : processes) {
-            // Step 3: If there's a gap between current time and process arrival,
-            // move current time forward to when the process arrives
+        for (int i = 0; i < processes.size(); i++) {
+            Process process = processes.get(i);
+            
+            // Wait if needed
             if (currentTime < process.arrivalTime) {
                 currentTime = process.arrivalTime;
             }
             
-            // Step 4: Calculate times for this process
-            process.completionTime = currentTime + process.burstTime;  // When process finishes
-            process.turnaroundTime = process.completionTime - process.arrivalTime;  // Total time in system
-            process.waitingTime = process.turnaroundTime - process.burstTime;  // Time spent waiting
+            // Update state to RUNNING
+            process.setState(ProcessState.RUNNING);
+            updateTableState(i, process.state);
+            simulateDelay();  // Optional: add delay for visualization
             
-            // Step 5: Move time forward by the burst time of this process
+            // Process execution
+            process.completionTime = currentTime + process.burstTime;
+            process.turnaroundTime = process.completionTime - process.arrivalTime;
+            process.waitingTime = process.turnaroundTime - process.burstTime;
             currentTime = process.completionTime;
+            
+            // Update state to COMPLETED
+            process.setState(ProcessState.COMPLETED);
+            updateTableState(i, process.state);
+            updateTableTimes(i, process);
+        }
+    }
+
+    // Helper method to update state in table
+    private void updateTableState(int row, ProcessState state) {
+        tableModel.setValueAt(state, row, 4);  // Assuming state is column 4
+    }
+
+    // Helper method to update times in table
+    private void updateTableTimes(int row, Process p) {
+        tableModel.setValueAt(p.completionTime, row, 5);
+        tableModel.setValueAt(p.turnaroundTime, row, 6);
+        tableModel.setValueAt(p.waitingTime, row, 7);
+    }
+
+    // Optional: Add delay for visualization
+    private void simulateDelay() {
+        try {
+            Thread.sleep(1000);  // 1 second delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
