@@ -15,24 +15,9 @@ public class CPUSchedulingApp extends JFrame {
     private DefaultTableModel tableModel;
     private JTextField randomProcessCountField;
     private Random random = new Random();
-
-    // Add this enum at the top of the class or as a separate file
-    public enum ProcessState {
-        READY("Ready"),
-        RUNNING("Running"),
-        COMPLETED("Completed");
-
-        private final String display;
-        
-        ProcessState(String display) {
-            this.display = display;
-        }
-        
-        @Override
-        public String toString() {
-            return display;
-        }
-    }
+    private GanttChartPanel ganttChartPanel;
+    private List<GanttChartBar> ganttChartData = new ArrayList<>();
+    private JButton toggleGanttChartButton;
 
     // Process class to represent individual processes
     static class Process {
@@ -43,18 +28,85 @@ public class CPUSchedulingApp extends JFrame {
         int completionTime;
         int turnaroundTime;
         int waitingTime;
-        ProcessState state;  // New field
-        
+
         public Process(String processId, int arrivalTime, int burstTime, int priority) {
             this.processId = processId;
             this.arrivalTime = arrivalTime;
             this.burstTime = burstTime;
             this.priority = priority;
-            this.state = ProcessState.READY;  // Initial state
+        }
+    }
+
+    // Gantt chart bar class
+    static class GanttChartBar {
+        String processId;
+        int startTime;
+        int endTime;
+        Color color;
+
+        public GanttChartBar(String processId, int startTime, int endTime, Color color) {
+            this.processId = processId;
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.color = color;
+        }
+    }
+
+    // Gantt chart panel class
+    class GanttChartPanel extends JPanel {
+        private static final int PADDING = 20;
+        private static final int BAR_HEIGHT = 40;
+        private static final int TIME_MARKER_HEIGHT = 20;
+        
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            if (ganttChartData.isEmpty()) return;
+
+            // Find the maximum end time
+            int maxEndTime = ganttChartData.stream()
+                    .mapToInt(bar -> bar.endTime)
+                    .max()
+                    .orElse(0);
+
+            // Calculate scaling factor
+            double timeScale = (double) (getWidth() - 2 * PADDING) / maxEndTime;
+
+            // Draw the timeline
+            g2d.setColor(Color.BLACK);
+            int baselineY = getHeight() - PADDING - TIME_MARKER_HEIGHT;
+            g2d.drawLine(PADDING, baselineY, getWidth() - PADDING, baselineY);
+
+            // Draw time markers
+            for (int t = 0; t <= maxEndTime; t++) {
+                int x = PADDING + (int)(t * timeScale);
+                g2d.drawLine(x, baselineY, x, baselineY + 5);
+                g2d.drawString(String.valueOf(t), x - 3, baselineY + TIME_MARKER_HEIGHT);
+            }
+
+            // Draw process bars
+            int y = PADDING;
+            for (GanttChartBar bar : ganttChartData) {
+                int x1 = PADDING + (int)(bar.startTime * timeScale);
+                int x2 = PADDING + (int)(bar.endTime * timeScale);
+                
+                // Draw the bar
+                g2d.setColor(bar.color);
+                g2d.fillRect(x1, y, x2 - x1, BAR_HEIGHT);
+                g2d.setColor(Color.BLACK);
+                g2d.drawRect(x1, y, x2 - x1, BAR_HEIGHT);
+                
+                // Draw the process ID
+                g2d.drawString(bar.processId, x1 + 5, y + BAR_HEIGHT/2 + 5);
+            }
         }
 
-        public void setState(ProcessState newState) {
-            this.state = newState;
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(800, 100);
         }
     }
 
@@ -101,27 +153,39 @@ public class CPUSchedulingApp extends JFrame {
         JButton scheduleButton = new JButton("Schedule");
         JButton clearButton = new JButton("Clear All");
         JButton generateRandomButton = new JButton("Generate Random Processes");
+        toggleGanttChartButton = new JButton("Hide Gantt Chart");
 
         addProcessButton.addActionListener(e -> addProcess());
         scheduleButton.addActionListener(e -> scheduleProcesses());
         clearButton.addActionListener(e -> clearAllProcesses());
         generateRandomButton.addActionListener(e -> generateRandomProcesses());
+        toggleGanttChartButton.addActionListener(e -> toggleGanttChart());
 
         buttonPanel.add(addProcessButton);
         buttonPanel.add(generateRandomButton);
         buttonPanel.add(scheduleButton);
         buttonPanel.add(clearButton);
+        buttonPanel.add(toggleGanttChartButton);
 
         // Table for displaying processes
         String[] columnNames = {"Process ID", "Arrival Time", "Burst Time", "Priority", 
-                              "State", "Completion Time", "Turnaround Time", "Waiting Time"};
+                                "Completion Time", "Turnaround Time", "Waiting Time"};
         tableModel = new DefaultTableModel(columnNames, 0);
         processTable = new JTable(tableModel);
         JScrollPane tableScrollPane = new JScrollPane(processTable);
 
+        // Create Gantt chart panel
+        ganttChartPanel = new GanttChartPanel();
+        ganttChartPanel.setBorder(BorderFactory.createTitledBorder("Gantt Chart"));
+        
+        // Create a panel for the table and Gantt chart
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(tableScrollPane, BorderLayout.CENTER);
+        centerPanel.add(ganttChartPanel, BorderLayout.SOUTH);
+
         // Layout
         mainPanel.add(inputPanel, BorderLayout.NORTH);
-        mainPanel.add(tableScrollPane, BorderLayout.CENTER);
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
@@ -156,7 +220,7 @@ public class CPUSchedulingApp extends JFrame {
             // Add to table
             tableModel.addRow(new Object[]{
                 processId, arrivalTime, burstTime, priority, 
-                ProcessState.READY, "-", "-", "-"
+                "-", "-", "-"
             });
         }
     }
@@ -173,8 +237,8 @@ public class CPUSchedulingApp extends JFrame {
 
             // Add to table
             tableModel.addRow(new Object[]{
-                processId, arrivalTime, burstTime, priority,
-                ProcessState.READY, "-", "-", "-"
+                processId, arrivalTime, burstTime, priority, 
+                "-", "-", "-"
             });
 
             // Clear input fields
@@ -261,57 +325,43 @@ public class CPUSchedulingApp extends JFrame {
 
 //Scheduling Algorithms//
 
-
 //First Come First Serve
     private void scheduleFCFS(List<Process> processes) {
+        // Clear previous Gantt chart data
+        ganttChartData.clear();
+        
         processes.sort((p1, p2) -> p1.arrivalTime - p2.arrivalTime);
         int currentTime = 0;
-        
-        for (int i = 0; i < processes.size(); i++) {
-            Process process = processes.get(i);
-            
-            // Wait if needed
+        Random colorRandom = new Random();
+
+        for (Process process : processes) {
             if (currentTime < process.arrivalTime) {
                 currentTime = process.arrivalTime;
             }
             
-            // Update state to RUNNING
-            process.setState(ProcessState.RUNNING);
-            updateTableState(i, process.state);
-            simulateDelay();  // Optional: add delay for visualization
+            // Create a Gantt chart bar for this process
+            Color randomColor = new Color(
+                colorRandom.nextFloat(),
+                colorRandom.nextFloat(),
+                colorRandom.nextFloat(),
+                0.5f
+            );
+            ganttChartData.add(new GanttChartBar(
+                process.processId,
+                currentTime,
+                currentTime + process.burstTime,
+                randomColor
+            ));
             
-            // Process execution
             process.completionTime = currentTime + process.burstTime;
             process.turnaroundTime = process.completionTime - process.arrivalTime;
             process.waitingTime = process.turnaroundTime - process.burstTime;
-            currentTime = process.completionTime;
             
-            // Update state to COMPLETED
-            process.setState(ProcessState.COMPLETED);
-            updateTableState(i, process.state);
-            updateTableTimes(i, process);
+            currentTime = process.completionTime;
         }
-    }
-
-    // Helper method to update state in table
-    private void updateTableState(int row, ProcessState state) {
-        tableModel.setValueAt(state, row, 4);  // Assuming state is column 4
-    }
-
-    // Helper method to update times in table
-    private void updateTableTimes(int row, Process p) {
-        tableModel.setValueAt(p.completionTime, row, 5);
-        tableModel.setValueAt(p.turnaroundTime, row, 6);
-        tableModel.setValueAt(p.waitingTime, row, 7);
-    }
-
-    // Optional: Add delay for visualization
-    private void simulateDelay() {
-        try {
-            Thread.sleep(1000);  // 1 second delay
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        
+        // Repaint the Gantt chart
+        ganttChartPanel.repaint();
     }
 
 //Priority
@@ -323,12 +373,23 @@ public class CPUSchedulingApp extends JFrame {
 //Round Robin
     private void scheduleRoundRobin(List<Process> processes, int timeQuantum) {
        
+
     }
 
 //Shortest Job First
     private void scheduleSJF(List<Process> processes) {
         // Sort by arrival time and burst time
         
+    }
+
+    private void toggleGanttChart() {
+        boolean isVisible = ganttChartPanel.isVisible();
+        ganttChartPanel.setVisible(!isVisible);
+        toggleGanttChartButton.setText(isVisible ? "Show Gantt Chart" : "Hide Gantt Chart");
+        
+        // Revalidate and repaint to ensure proper layout update
+        revalidate();
+        repaint();
     }
 
     public static void main(String[] args) {
