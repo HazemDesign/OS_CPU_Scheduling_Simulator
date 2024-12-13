@@ -7,8 +7,8 @@
 
 ### 2. Create the Process Data Structure
 - [x] In the `Process` class, add properties like `processNumber`, `cpuTime`, `priority`, and `state`.
-- [ ] Add methods to get and set these values.
-- [ ] Create a constructor to initialize each process with its required values.
+- [x] Add methods to get and set these values.
+- [x] Create a constructor to initialize each process with its required values.
 
 ### 3. Set Up the Ready Queue
 - [ ] Use a Java data structure like `ArrayList` or `Queue` for managing processes in the ready queue.
@@ -20,7 +20,7 @@
 - [ ] Focus only on the order of execution, not different arrival times.
 
 ### 5. Build a Simple Java GUI
-- [ ] Set up the GUI framework (Java Swing or JavaFX).
+- [x] Set up the GUI framework (Java Swing or JavaFX).
 - [ ] Add input fields for process details (number, CPU time, priority, and RR time quantum).
 - [ ] Add dropdowns or buttons to select a scheduling algorithm.
 - [ ] Design an output area to display results and process state changes.
