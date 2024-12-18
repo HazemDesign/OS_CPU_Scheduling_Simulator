@@ -330,14 +330,12 @@ public class CPUSchedulingApp extends JFrame {
         // Clear previous Gantt chart data
         ganttChartData.clear();
         
-        processes.sort((p1, p2) -> p1.arrivalTime - p2.arrivalTime);
+        processes.sort(Comparator.comparingInt(p -> p.arrivalTime));
         int currentTime = 0;
         Random colorRandom = new Random();
 
         for (Process process : processes) {
-            if (currentTime < process.arrivalTime) {
-                currentTime = process.arrivalTime;
-            }
+            int startTime = Math.max(currentTime, process.arrivalTime);
             
             // Create a Gantt chart bar for this process
             Color randomColor = new Color(
@@ -348,12 +346,12 @@ public class CPUSchedulingApp extends JFrame {
             );
             ganttChartData.add(new GanttChartBar(
                 process.processId,
-                currentTime,
-                currentTime + process.burstTime,
+                startTime,
+                startTime + process.burstTime,
                 randomColor
             ));
             
-            process.completionTime = currentTime + process.burstTime;
+            process.completionTime = startTime + process.burstTime;
             process.turnaroundTime = process.completionTime - process.arrivalTime;
             process.waitingTime = process.turnaroundTime - process.burstTime;
             
